@@ -18,15 +18,19 @@
 #include <Wire.h>
 
 // Define Slave I2C Address
-#define SLAVE_ADDR 9
-
+#define SLAVE_ADDR_SOLAR 8
+#define SLAVE_ADDR_BATTERY 9 // not entirely sure if this is gonna work but will test and do something different elsewise 
+#define SLAVE_ADDR_CRANK 10 
 // Define Slave answer size - will probably change 
 #define ANSWERSIZE 5
+#define EL_PIN 1 //arbitrary pin number for EL wire 
+#define BATTERY_THRESHOLD 1 //arbitrary battery threshold value 
 
 //defining the strings that will be the values here 
 String solarvalue = "";
 String crankvalue = "";
 String batteryvalue = "";
+float batteryvalue_float = 0; 
 
 
 
@@ -45,6 +49,9 @@ void loop() {
   crank();
   battery();
   displayvalues(); //not sure if we are gonna need to always be running display values - might need to run something interactive simultaneously//
+  if (batteryvalue_float > BATTERY_THRESHOLD) {
+    showcase(); 
+  }
   delay(50); //delay for however long we want our systems to check the values// 
 }
 
@@ -56,7 +63,7 @@ void panels() {
   Serial.println("Write data to slave");
   
   // Write a charatre to the Slave to signal that we want that solar DATA 
-  Wire.beginTransmission(SLAVE_ADDR);
+  Wire.beginTransmission(SLAVE_ADDR_SOLAR);
   Wire.write(0);
   Wire.endTransmission();
     
@@ -64,7 +71,7 @@ void panels() {
   
   // Read response from Slave
   // Read back 5 characters
-  Wire.requestFrom(SLAVE_ADDR,ANSWERSIZE);
+  Wire.requestFrom(SLAVE_ADDR_SOLAR,ANSWERSIZE);
   
   // Add characters to string
   while (Wire.available()) {
@@ -82,7 +89,7 @@ void panels() {
   Serial.println("Write data to slave");
   
   // Write a charatre to the Slave
-  Wire.beginTransmission(SLAVE_ADDR);
+  Wire.beginTransmission(SLAVE_ADDR_CRANK);
   Wire.write(0);
   Wire.endTransmission();
     
@@ -90,7 +97,7 @@ void panels() {
   
   // Read response from Slave
   // Read back 5 characters
-  Wire.requestFrom(SLAVE_ADDR,ANSWERSIZE);
+  Wire.requestFrom(SLAVE_ADDR_CRANK,ANSWERSIZE);
   
   // Add characters to string
   while (Wire.available()) {
@@ -108,7 +115,7 @@ void panels() {
   Serial.println("Write data to slave");
   
   // Write a charatre to the Slave
-  Wire.beginTransmission(SLAVE_ADDR);
+  Wire.beginTransmission(SLAVE_ADDR_BATTERY);
   Wire.write(0);
   Wire.endTransmission();
     
@@ -116,7 +123,7 @@ void panels() {
   
   // Read response from Slave
   // Read back 5 characters
-  Wire.requestFrom(SLAVE_ADDR,ANSWERSIZE);
+  Wire.requestFrom(SLAVE_ADDR_BATTERY,ANSWERSIZE);
   
   // Add characters to string
   while (Wire.available()) {
@@ -124,10 +131,21 @@ void panels() {
       batteryvalue += b;
   } 
   
-  // Print to Serial Monitor
+  // Print to Serial Monitor (testing) 
   Serial.println(batteryvalue);
   }
 
   void displayvalues(){
     //write code here to take stored values and update user display
+    //code found on github here (kinda clunky to throw in here ATM) 
+  }
+
+  void showcase() {
+    //code to trigger showCASE baby 
+    digitalWrite(EL_PIN, HIGH); 
+    motortrigger();
+  }
+
+  void motortrigger(){
+    //motor code here!!!!!!!!!!
   }
